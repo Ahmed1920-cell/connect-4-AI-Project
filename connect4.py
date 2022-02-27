@@ -5,8 +5,6 @@ import sys
 import math
 import time
 
-from pygame.event import Event
-
 BLUE = (0,0,255)
 BLACK = (10,10,10)
 WHITE=(255,255,255)
@@ -22,7 +20,6 @@ NUM_OF_COLUMNS = 7
 EMPTY_PLACE = 0
 PLAYER_PIECE = 1
 AI_PIECE = 2
-PLAYER2_PIECE = 3
 
 SLICE_LEN = 4 #used for slicing the board to compute the Heuristics
 
@@ -120,9 +117,7 @@ def fill_board(board):
             elif board[row][col] == AI_PIECE:
                 pygame.draw.circle(screen, Lite_Blue, (int(col * Cell_size + Cell_size / 2), height_of_screen - int(row * Cell_size + Cell_size / 2)), RADIUS)
                 pygame.draw.circle(screen, Blue, (int(col * Cell_size + Cell_size / 2), height_of_screen - int(row * Cell_size + Cell_size / 2)), RADIUS - 8)
-            elif board[row][col] == PLAYER2_PIECE:
-                pygame.draw.circle(screen, Lite_Blue, (int(col * Cell_size + Cell_size / 2), height_of_screen - int(row * Cell_size + Cell_size / 2)), RADIUS)
-                pygame.draw.circle(screen, Blue, (int(col * Cell_size + Cell_size / 2), height_of_screen - int(row * Cell_size + Cell_size / 2)), RADIUS - 8)
+
     pygame.display.update()
 
 def drop_piece(board, row, col, piece):
@@ -196,7 +191,7 @@ def is_drawing(board):
 
     return True
 
-'''def slice_score(slice):
+def slice_score(slice):
     score = 0
 
     if len(slice) == 5:
@@ -365,25 +360,24 @@ def minimax(board, depth, alpha, beta, maximizingPlayer):
                 beta = value
             if alpha >= beta:
                 break
-        return column, value'''
+        return column, value
+
+turn = random.randint(PLAYER_PIECE, AI_PIECE)
 
 board = create_board()
 show_board()
 fill_board(board)
-turn = PLAYER_PIECE
+
 if not hardness_selected :
-    left_button=button((50,205,50),10+20,5,150,90,"Easy")
-    center_button=button((255,215,0),170+20,5,200,90,"Normal")
-    right_button=button((139,0,0),380+20,5,150,90,"Evil!")
-    right2_button=button((139,0,0),540+20,5,120,90,"2P")
+    left_button=button((50,205,50),20+10,5,200,90,"Easy")
+    center_button=button((255,215,0),240+10,5,200,90,"Normal")
+    right_button=button((139,0,0),460+10,5,200,90,"Evil !")
     pygame.display.update()
 
 game_over = False
 
 while True:
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            sys.exit()
         if not hardness_selected:
             pos=pygame.mouse.get_pos()
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -399,30 +393,20 @@ while True:
                     depth = 5
                     hardness_selected = True
                     continue
-                if right2_button.isclick(pos):
-                    C=True
-                    hardness_selected = True
-                    continue
 
         elif not game_over:
             pygame.draw.rect(screen, GRAY, (0, 0, width_of_screen, 100))
-           # if right2_button.isclick(pos):
-               # turn = PLAYER_PIECE
-            X_pos=event.pos[0]
-            Y_pos=event.pos[0]
+            X_pos=pygame.mouse.get_pos()[0]
             if turn == PLAYER_PIECE:
                 pygame.draw.circle(screen, Lite_Green, (X_pos, int(Cell_size / 2)), RADIUS)
                 pygame.draw.circle(screen, Green, (X_pos, int(Cell_size / 2)), RADIUS - 8)
-            if turn==PLAYER2_PIECE:
-               pygame.draw.circle(screen, Lite_Blue, (X_pos ,int(Cell_size / 2)), RADIUS)
-               pygame.draw.circle(screen, Blue, (X_pos, int(Cell_size / 2)), RADIUS - 8)
             pygame.display.update()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pygame.draw.rect(screen, GRAY, (0, 0, width_of_screen, 100))
                 # Ask for Player 1 Input
                 if turn == PLAYER_PIECE:
-                    X_pos = event.pos[0]
+                    X_pos = pygame.mouse.get_pos()[0]
                     col = int(math.floor(X_pos / Cell_size))
                     if is_available_col(board, col):
                         row = get_next_open_row(board, col)
@@ -437,34 +421,14 @@ while True:
                             label = myfont2.render("It's a Draw !!!", True, WHITE)
                             screen.blit(label, (100,30))
                             game_over = True
-                        if C:
-                             turn = PLAYER2_PIECE
-                        else:
-                             turn = AI_PIECE
 
-                    fill_board(board)
-                    pygame.display.update()
-                if turn == PLAYER2_PIECE and not game_over:
-                    Y_pos = event.pos[0]
-                    col2 = int(math.floor(Y_pos / Cell_size))
-                    if is_available_col(board, col2):
-                         row = get_next_open_row(board, col2)
-                         drop_piece(board, row, col2, AI_PIECE)
-                         if is_winning(board, AI_PIECE):
-                            label = myfont2.render("You beat the AI !!", True, WHITE)
-                            screen.blit(label, (20,30))
-                            game_over = True
+                        turn = AI_PIECE
 
-                         if is_drawing(board):
-                             label = myfont2.render("It's a Draw !!!", True, WHITE)
-                             screen.blit(label, (100,30))
-                             game_over = True
+                        fill_board(board)
 
-                    turn = PLAYER_PIECE
+        if event.type == pygame.QUIT:
+            sys.exit()
 
-                    fill_board(board)
-                    pygame.display.update()
-                
     if turn == AI_PIECE and not game_over and hardness_selected:
 
         col, minimax_score = minimax(board, depth, -math.inf, math.inf, True)
@@ -484,4 +448,4 @@ while True:
 
         fill_board(board)
 
-        turn = PLAYER_PIECE 
+        turn = PLAYER_PIECE

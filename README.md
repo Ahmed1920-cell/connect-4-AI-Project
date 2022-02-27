@@ -1,1 +1,1 @@
-# connect-4-AI-Project
+# Connect_4-with-minimax-useing-alpha_beta_pruning
